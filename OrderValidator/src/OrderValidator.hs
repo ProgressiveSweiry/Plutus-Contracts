@@ -18,20 +18,13 @@
 module OrderValidator where
 
 import           Ledger.Typed.Scripts as Scripts
-import           Ledger.Typed.Scripts.Validators as Validators
 import           Plutus.V1.Ledger.Value 
 import           Plutus.V1.Ledger.Address       as Address
 import           Playground.Contract
 import           Plutus.Contract
 import           Ledger.Constraints as Constraints
-import           Codec.Serialise         hiding ( encode )
-import qualified Data.ByteString.Lazy          as LBS
-import qualified Data.ByteString.Short         as SBS
-import           GHC.Generics                   ( Generic )
 import           Ledger                  hiding ( singleton )
 import           Ledger.Value                  as Value
-import           Plutus.V1.Ledger.Ada           ( lovelaceValueOf )
-import qualified Plutus.V1.Ledger.Api          as Plutus
 import qualified PlutusTx
 import           PlutusTx.Prelude        hiding ( Applicative(..)
                                                 , unless
@@ -182,7 +175,7 @@ order datum = do
 redeem :: AsContractError e => OrderAction -> Contract w s e ()
 redeem myRedeemer = do
     unspentOutputs <- utxosAt contractAddress
-    case myRedeemer of
+    case myRedeemer of 
         CancelOrder -> do
             let tx       = collectFromScript unspentOutputs myRedeemer
             void $ submitTxConstraintsSpending orderTypedValidator unspentOutputs tx

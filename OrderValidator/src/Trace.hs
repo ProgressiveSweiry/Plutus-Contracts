@@ -103,6 +103,28 @@ myTrace4 = do
     s <- waitNSlots 2
     Extras.logInfo $ "reached" ++ show s
 
+test5 :: IO ()
+test5 = runEmulatorTraceIO' def emCfg myTrace5
+
+myTrace5 :: EmulatorTrace ()
+myTrace5 = do
+    h1 <- activateContractWallet (knownWallet 1) endpoints
+    h2 <- activateContractWallet (knownWallet 2) endpoints
+    let pkh = (\(Just x) -> x) $ toPubKeyHash $ mockWalletAddress $ knownWallet 1
+    let order1 = Order { oCreator      = pkh
+                        , oBuyCurrency = currency
+                        , oBuyToken    = name
+                        , oBuyAmount   = 20 }
+    callEndpoint @"order" h1 $ OrderDatum
+        { odOrder = order1
+        }
+    void $ waitNSlots 2
+    callEndpoint @"redeem" h2 $ FullMatch
+    void $ waitNSlots 2
+    callEndpoint @"redeem" h1 $ CancelOrder
+    s <- waitNSlots 2
+    Extras.logInfo $ "reached" ++ show s
+
 
 emCfg :: EmulatorConfig
 emCfg = EmulatorConfig (Left $ Map.fromList [(knownWallet w, v) | w <- [1 .. 2]]) def def
